@@ -7,6 +7,7 @@ IpsSensor ips_sensor;
 
 void setup()
 {
+  // Wait on IPS bootloader
   delay(3500);
   // Initiate I2C connection SDA 21, SCL 22 by default
   // Set different pins by using:
