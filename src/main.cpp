@@ -6,22 +6,22 @@
 byte rcvData = 0;
 byte rcvData2 = 0;
 
-IpsSensor sensor;
+IpsSensor ips_sensor;
 
 void setup()
 {
   delay(3500);
-  sensor.begin();
+  ips_sensor.begin();
   Serial.begin(115200);
   Serial.println("\nI2C Test");
 }
 
 void loop()
 {
-  sensor.update();
-  Serial.println(sensor.getPC01());
-  Serial.println(sensor.getPM10());
-  Serial.println(sensor.getPM25());
+  ips_sensor.update();
+  Serial.println(ips_sensor.getPC01());
+  Serial.println(ips_sensor.getPM10());
+  Serial.println(ips_sensor.getPM25());
 
   delay(1000);
 }
