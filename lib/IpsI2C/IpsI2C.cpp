@@ -3,12 +3,6 @@
 
 #include "IpsI2C.h"
 
-union bytesToPM
-{
-  float f;
-  unsigned char c[4];
-};
-
 void IpsSensor::begin(int sda, int scl)
 {
   Wire.begin(sda, scl);
@@ -37,7 +31,7 @@ void IpsSensor::update()
     bytesToPM b;
     for (size_t j = 0; j < 4; ++j)
     {
-      b.c[j] = pm_raw_values[j + (i * 4)];
+      b.byte[j] = pm_raw_values[j + (i * 4)];
     }
     this->pm_values[i] = b.f;
   }

@@ -1,5 +1,12 @@
 #pragma once
 
+
+union bytesToPM
+{
+  float f;
+  unsigned char byte[4];
+};
+
 class IpsSensor
 {
 public:
