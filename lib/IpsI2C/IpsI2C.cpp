@@ -160,11 +160,20 @@ float IpsSensor::getPM100()
   return this->pm_values[6];
 }
 
-// int IpsSensor::getVref()
-// {
-//   // Read Vref
-//   std::vector<int> message = this->read_i2c(0x69, 2);
-//   unsigned short int x;
-//   x = message[1] | (message[0] << 8);
-//   Serial.println(x);
-// }
+int IpsSensor::getVref()
+{
+  // Read Vref
+  std::vector<int> message = this->read_i2c(0x69, 2);
+  unsigned short int vref;
+  vref = message[1] | (message[0] << 8);
+  return vref;
+}
+
+int IpsSensor::getStatus()
+{
+  // Read Status
+  std::vector<int> message = this->read_i2c(0x6A, 1);
+  unsigned short int status;
+  status = message[0];
+  return status;
+}

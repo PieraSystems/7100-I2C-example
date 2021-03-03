@@ -30,6 +30,8 @@ public:
     float getPM25();
     float getPM50();
     float getPM100();
+    int getVref();
+    int getStatus();
     std::vector<int> read_i2c(unsigned char, int, bool checksum = false);
     uint8_t get_checksum(int *byte, int);
 };
