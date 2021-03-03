@@ -86,7 +86,7 @@ std::vector<int> IpsSensor::read_i2c(unsigned char command, int reply_size, bool
     {
       // Checksum failed;
       //Serial.println("Checksum Failed.");
-      delay(10);
+      delay(100);
     }
   }
   return received_bytes;
