@@ -3,15 +3,21 @@
 
 #include "IpsI2C.h"
 
+// For CRC16 checksum
+#define POLY 0x8408
+
+bool ips_debug = false;
+
 void IpsSensor::begin(int sda, int scl)
 {
   Wire.begin(sda, scl);
+  //Wire.setClock(100000);
 }
 
 void IpsSensor::update()
 {
   // Read PC data
-  std::vector<int> pc_raw_values = this->read_i2c(0x11, 29, true);
+  std::vector<uint8_t> pc_raw_values = this->read_i2c(0x11, 30, true);
 
   // Assemble PC values (unsigned long) from 4 bytes via bitwise
   this->pc_values[0] = pc_raw_values[3] | (pc_raw_values[2] << 8) | (pc_raw_values[1] << 16) | (pc_raw_values[0] << 24);
@@ -23,8 +29,8 @@ void IpsSensor::update()
   this->pc_values[6] = pc_raw_values[27] | (pc_raw_values[26] << 8) | (pc_raw_values[25] << 16) | (pc_raw_values[24] << 24);
 
   // Read PM data
-  std::vector<int> pm_raw_values = this->read_i2c(0x12, 29, true);
-  
+  std::vector<uint8_t> pm_raw_values = this->read_i2c(0x12, 30, true);
+
   // Assemble PM values (float) from 4 bytes via union
   for (size_t i = 0; i < 7; ++i)
   {
@@ -35,33 +41,35 @@ void IpsSensor::update()
     }
     this->pm_values[i] = b.f;
   }
-
-  // Debug raw bytes
-
-  // Serial.print("[ ");
-  // for (auto &single_byte : pc_raw_values)
-  // {
-  //   Serial.print(single_byte);
-  //   Serial.print(" ");
-  // }
-  // Serial.print("]\n");
 }
 
-uint8_t IpsSensor::get_checksum(int *byte, int len)
+// Get CRC16 checksum
+uint16_t IpsSensor::get_checksum(uint8_t *byte, int len)
 {
-  int i;
-  uint8_t crc = 0;
-  for (i = 0; i < len; i++)
+  int i, j;
+  uint16_t data = 0;
+  uint16_t crc = 0xffff;
+  for (j = 0; j < len; j++)
   {
-    crc ^= byte[i];
+    data = (uint16_t)0xff & byte[j];
+    for (i = 0; i < 8; i++, data >>= 1)
+    {
+      if ((crc & 0x0001) ^ (data & 0x0001))
+        crc = (crc >> 1) ^ POLY;
+      else
+        crc >>= 1;
+    }
   }
+  crc = ~crc;
+  data = crc;
+  crc = (crc << 8) | (data >> 8 & 0xff);
   return crc;
 }
 
-std::vector<int> IpsSensor::read_i2c(unsigned char command, int reply_size, bool checksum)
+std::vector<uint8_t> IpsSensor::read_i2c(unsigned char command, int reply_size, bool checksum)
 {
   bool checksum_pass = false;
-  std::vector<int> received_bytes;
+  std::vector<uint8_t> received_bytes;
   while (!checksum_pass)
   {
     received_bytes.clear();
@@ -73,19 +81,44 @@ std::vector<int> IpsSensor::read_i2c(unsigned char command, int reply_size, bool
     {
       received_bytes.push_back(Wire.read());
     }
+
+    // Debug raw bytes
+    if (ips_debug)
+    {
+      Serial.print("[ ");
+      for (auto &single_byte : received_bytes)
+      {
+        Serial.print(single_byte);
+        Serial.print(" ");
+      }
+      Serial.print("]\n");
+    }
+
     if (!checksum)
     {
       break;
     }
-    uint8_t message_check = this->get_checksum(received_bytes.data(), 28);
-    if (message_check == received_bytes[received_bytes.size() - 1])
+    uint16_t message_checksum = this->get_checksum(received_bytes.data(), reply_size - 2);
+    uint16_t received_checksum = (received_bytes[received_bytes.size() - 2] * 256) + received_bytes[received_bytes.size() - 1];
+    if (ips_debug)
+    {
+      Serial.print("Expected checksum: ");
+      Serial.print(message_checksum);
+      Serial.print(" Received checksum: ");
+      Serial.print(received_checksum);
+      Serial.print("\n");
+    }
+    if (message_checksum == received_checksum)
     {
       checksum_pass = true;
     }
     else
     {
       // Checksum failed;
-      //Serial.println("Checksum Failed.");
+      if (ips_debug)
+      {
+        Serial.println("Checksum Failed.");
+      }
       delay(100);
     }
   }
@@ -163,7 +196,7 @@ float IpsSensor::getPM100()
 int IpsSensor::getVref()
 {
   // Read Vref
-  std::vector<int> message = this->read_i2c(0x69, 2);
+  std::vector<uint8_t> message = this->read_i2c(0x69, 4, true);
   unsigned short int vref;
   vref = message[1] | (message[0] << 8);
   return vref;
@@ -172,8 +205,13 @@ int IpsSensor::getVref()
 int IpsSensor::getStatus()
 {
   // Read Status
-  std::vector<int> message = this->read_i2c(0x6A, 1);
+  std::vector<uint8_t> message = this->read_i2c(0x6A, 3, true);
   unsigned short int status;
   status = message[0];
   return status;
+}
+
+void IpsSensor::setDebug(bool debug_setting)
+{
+  ips_debug = debug_setting;
 }
