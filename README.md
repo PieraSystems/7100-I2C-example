@@ -1,7 +1,5 @@
 # 7100-I2C-example
 
-### Important Update: Starting with firmware version 1.86, checksums are now two bytes long. For firmware versions 1.83 and below, [refer to this code](https://github.com/PieraSystems/7100-I2C-example/archive/refs/tags/1.83.zip).
-
 ## Parts required
 * [Piera Systems IPS-7100](https://www.pierasystems.com/products/)
 * [ESP32 devkit](https://www.digikey.com/en/products/detail/espressif-systems/ESP32-DEVKITC-32E/12091810)
