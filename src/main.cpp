@@ -7,21 +7,21 @@ IpsSensor ips_sensor;
 
 int success_count;
 int fail_count;
+int last = true;
 
 void setup()
 {
-  // Wait on IPS bootloader
-  delay(3500);
+  // Initiate USB serial at 115200 baud
+  Serial.begin(115200);
+  Serial.println("\nI2C Test");
+  // Wait on IPS boot
+  delay(5500);
 
   // Initiate I2C connection SDA 21, SCL 22 by default
   // Set different pins by using:
   // ips_sensor.begin(SDA_PIN, SCL_PIN)
-  ips_sensor.begin();
-  //ips_sensor.begin();
-
-  // Initiate USB serial at 115200 baud
-  Serial.begin(115200);
-  Serial.println("\nI2C Test");
+  ips_sensor.begin(21, 22);
+  
 }
 
 void loop()
@@ -29,7 +29,6 @@ void loop()
   // Get new IPS sensor readings
   // Not meant to run more than once per second
   ips_sensor.update();
-
   //Enable debugging
   // ips_sensor.setDebug(true);
 
@@ -50,6 +49,14 @@ void loop()
   Serial.print("PM10: ");
   Serial.print(ips_sensor.getPM100());
   Serial.print("\n");
+
+  // Print PC1.0 via USB serial
+  Serial.print("PC1.0: ");
+  Serial.print(ips_sensor.getPC10());
+  Serial.print("\n");
+
+  // ips_sensor.setFan(true);
+  // last = !last;
 
   // Print sensor status
   // int status = ips_sensor.getStatus();
@@ -75,6 +82,7 @@ void loop()
   // Serial.print(" Fail_count: ");
   // Serial.print(fail_count);
   // Serial.print("\n");
+
 
   delay(1000);
 }

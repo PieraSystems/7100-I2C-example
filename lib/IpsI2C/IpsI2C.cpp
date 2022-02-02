@@ -10,14 +10,32 @@ bool ips_debug = false;
 
 void IpsSensor::begin(int sda, int scl)
 {
+  Serial.print("IpsSensor begin");
+  Serial.print(sda);
+  Serial.print(scl);
+  Serial.print("\n");
   Wire.begin(sda, scl);
+  Wire.setTimeOut(3000);
   //Wire.setClock(100000);
+  delay(100);
+  Wire.beginTransmission(0x4B);
+  Wire.write(0x10);
+  Wire.write(0x01);
+  Wire.endTransmission();
+  // Wire.beginTransmission(0x4B);
+  // Wire.write(0x22);
+  // Wire.write(0x00);
+  // Wire.endTransmission();
+  // Wire.beginTransmission(0x4B);
+  // Wire.write(0x2d);
+  // Wire.endTransmission();
 }
 
 void IpsSensor::update()
 {
   // Read PC data
-  std::vector<uint8_t> pc_raw_values = this->read_i2c(0x11, 30, true);
+  uint8_t pc_raw_values[30];
+  this->read_i2c(0x11, 30, pc_raw_values, true);
 
   // Assemble PC values (unsigned long) from 4 bytes via bitwise
   this->pc_values[0] = pc_raw_values[3] | (pc_raw_values[2] << 8) | (pc_raw_values[1] << 16) | (pc_raw_values[0] << 24);
@@ -29,8 +47,8 @@ void IpsSensor::update()
   this->pc_values[6] = pc_raw_values[27] | (pc_raw_values[26] << 8) | (pc_raw_values[25] << 16) | (pc_raw_values[24] << 24);
 
   // Read PM data
-  std::vector<uint8_t> pm_raw_values = this->read_i2c(0x12, 30, true);
-
+  uint8_t pm_raw_values[32];
+  this->read_i2c(0x12, 32, pm_raw_values, true);
   // Assemble PM values (float) from 4 bytes via union
   for (size_t i = 0; i < 7; ++i)
   {
@@ -66,29 +84,26 @@ uint16_t IpsSensor::get_checksum(uint8_t *byte, int len)
   return crc;
 }
 
-std::vector<uint8_t> IpsSensor::read_i2c(unsigned char command, int reply_size, bool checksum)
+void IpsSensor::read_i2c(unsigned char command, int reply_size, uint8_t res_array[], bool checksum)
 {
   bool checksum_pass = false;
-  std::vector<uint8_t> received_bytes;
   while (!checksum_pass)
   {
-    received_bytes.clear();
-    Wire.beginTransmission(0x4B);
-    Wire.write(command);
-    Wire.endTransmission();
+    uint8_t *new_command = &command;
+    Wire.writeTransmission(0x4B, new_command, 8, false);
     Wire.requestFrom(0x4B, reply_size);
-    for (int n = 1; n <= reply_size; n++)
+    for (int n = 0; n < reply_size; n++)
     {
-      received_bytes.push_back(Wire.read());
+      res_array[n] = Wire.read();
     }
 
     // Debug raw bytes
     if (ips_debug)
     {
       Serial.print("[ ");
-      for (auto &single_byte : received_bytes)
+      for (int n = 0; n < reply_size; n++)
       {
-        Serial.print(single_byte);
+        Serial.print(res_array[n]);
         Serial.print(" ");
       }
       Serial.print("]\n");
@@ -98,8 +113,8 @@ std::vector<uint8_t> IpsSensor::read_i2c(unsigned char command, int reply_size, 
     {
       break;
     }
-    uint16_t message_checksum = this->get_checksum(received_bytes.data(), reply_size - 2);
-    uint16_t received_checksum = (received_bytes[received_bytes.size() - 2] * 256) + received_bytes[received_bytes.size() - 1];
+    uint16_t message_checksum = this->get_checksum(res_array, reply_size - 2);
+    uint16_t received_checksum = (res_array[reply_size - 2] * 256) + res_array[reply_size - 1];
     if (ips_debug)
     {
       Serial.print("Expected checksum: ");
@@ -122,7 +137,15 @@ std::vector<uint8_t> IpsSensor::read_i2c(unsigned char command, int reply_size, 
       delay(100);
     }
   }
-  return received_bytes;
+}
+
+boolean IpsSensor::write_i2c(unsigned char command, unsigned char parameter)
+{
+  Wire.beginTransmission(0x4B);
+  Wire.write(command);
+  Wire.write(parameter);
+  Wire.endTransmission();
+  return true;
 }
 
 unsigned long *IpsSensor::getPC()
@@ -196,7 +219,8 @@ float IpsSensor::getPM100()
 int IpsSensor::getVref()
 {
   // Read Vref
-  std::vector<uint8_t> message = this->read_i2c(0x69, 4, true);
+  uint8_t message[4];
+  this->read_i2c(0x69, 4, message, true);
   unsigned short int vref;
   vref = message[1] | (message[0] << 8);
   return vref;
@@ -205,10 +229,26 @@ int IpsSensor::getVref()
 int IpsSensor::getStatus()
 {
   // Read Status
-  std::vector<uint8_t> message = this->read_i2c(0x6A, 3, true);
+  uint8_t message[3];
+  this->read_i2c(0x6A, 3, message, true);
   unsigned short int status;
   status = message[0];
   return status;
+}
+
+bool IpsSensor::setFan(bool status)
+{
+  bool result;
+  // Read Status
+  if (status)
+  {
+    result = this->write_i2c(0x2B, 1);
+  }
+  else
+  {
+    result = this->write_i2c(0x2B, 0);
+  }
+  return result;
 }
 
 void IpsSensor::setDebug(bool debug_setting)
