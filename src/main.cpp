@@ -36,24 +36,65 @@ void loop()
   // Serial.println(ips_sensor.getPC01());
 
   // Print PM1.0 via USB serial
-  Serial.print("PM1.0: ");
-  Serial.print(ips_sensor.getPM10());
-  Serial.print("\n");
+  // Serial.print("PM1.0: ");
+  // Serial.print(ips_sensor.getPM10());
+  // Serial.print("\n");
 
   // Print PM2.5 via USB serial
-  Serial.print("PM2.5: ");
-  Serial.print(ips_sensor.getPM25());
-  Serial.print("\n");
+  // Serial.print("PM2.5: ");
+  // Serial.print(ips_sensor.getPM25());
+  // Serial.print("\n");
 
   // Print PM10 via USB serial
-  Serial.print("PM10: ");
-  Serial.print(ips_sensor.getPM100());
-  Serial.print("\n");
+  // Serial.print("PM10: ");
+  // Serial.print(ips_sensor.getPM100());
+  // Serial.print("\n");
 
   // Print PC1.0 via USB serial
-  Serial.print("PC1.0: ");
-  Serial.print(ips_sensor.getPC10());
+  // Serial.print("PC1.0: ");
+  // Serial.print(ips_sensor.getPC10());
+  // Serial.print("\n");
+  
+  // Serial.print("Serial #: ");
+  // uint8_t serial[19];
+  // ips_sensor.getSerial(serial);
+  // Serial.print((char*) serial);
+  // Serial.print("\n");
+
+  // Serial.print("Version #: ");
+  // uint8_t version[20];
+  // ips_sensor.getVersion(version);
+  // Serial.print((char*) version);
+  // Serial.print("\n");
+
+  // ips_sensor.setDataUnit(0);
+
+  // Serial.print("Data unit: ");
+  // Serial.print(ips_sensor.getDataUnit());
+  // Serial.print("\n");
+
+  ips_sensor.setCleaningInterval(604800);
+  // delay(500);
+  // ips_sensor.setDataUnit(0);
+  
+  
+  Serial.print("Cleaning interval: ");
+  Serial.print(ips_sensor.getCleaningInterval());
   Serial.print("\n");
+
+  // delay(1000);
+  // ips_sensor.setCleaningInterval(704802);
+  // delay(2000);
+  
+  // ips_sensor.setPSM(true);
+  // delay(1000);
+
+  // ips_sensor.update();
+  // delay(2000);
+
+  // Serial.print("Cleaning interval: ");
+  // Serial.print(ips_sensor.getCleaningInterval());
+  // Serial.print("\n");
 
   // ips_sensor.setFan(true);
   // last = !last;
@@ -84,5 +125,5 @@ void loop()
   // Serial.print("\n");
 
 
-  delay(1000);
+  delay(500);
 }

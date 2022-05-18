@@ -22,6 +22,7 @@ void IpsSensor::begin(int sda, int scl)
   Wire.write(0x10);
   Wire.write(0x01);
   Wire.endTransmission();
+
   // Wire.beginTransmission(0x4B);
   // Wire.write(0x22);
   // Wire.write(0x00);
@@ -89,8 +90,11 @@ void IpsSensor::read_i2c(unsigned char command, int reply_size, uint8_t res_arra
   bool checksum_pass = false;
   while (!checksum_pass)
   {
-    uint8_t *new_command = &command;
-    Wire.writeTransmission(0x4B, new_command, 8, false);
+    // uint8_t *new_command = &command;
+    // Wire.writeTransmission(0x4B, new_command, 8, false);
+    Wire.beginTransmission(0x4B);
+    Wire.write(command);
+    Wire.endTransmission();
     Wire.requestFrom(0x4B, reply_size);
     for (int n = 0; n < reply_size; n++)
     {
@@ -236,10 +240,52 @@ int IpsSensor::getStatus()
   return status;
 }
 
+int IpsSensor::getDataUnit()
+{
+  uint8_t message[3];
+  this->read_i2c(0x64, 3, message, true);
+  unsigned short int unit;
+  unit = message[0];
+  return unit;
+}
+
+void IpsSensor::getSerial(uint8_t* message)
+{
+  this->read_i2c(0x77, 19, message, true);
+  message[17] = 0;
+}
+
+void IpsSensor::getVersion(uint8_t* message)
+{
+  this->read_i2c(0x78, 9, message, true);
+  message[7] = 0;
+}
+
+unsigned long IpsSensor::getCleaningInterval()
+{
+  uint8_t clean_raw_values[4];
+  this->read_i2c(0x61, 6, clean_raw_values, true);
+
+  // Assemble PC values (unsigned long) from 4 bytes via bitwise
+  return clean_raw_values[3] | (clean_raw_values[2] << 8) | (clean_raw_values[1] << 16) | (clean_raw_values[0] << 24);
+};
+
+bool IpsSensor::setCleaningInterval(unsigned long interval)
+{
+  
+  Wire.beginTransmission(0x4B);
+  Wire.write(0x21);
+  Wire.write((interval >> 24) & 0xFF);
+  Wire.write((interval >> 16) & 0xFF);
+  Wire.write((interval >> 8) & 0xFF);
+  Wire.write(interval & 0xFF);
+  Wire.endTransmission();
+  return true;
+}
+
 bool IpsSensor::setFan(bool status)
 {
   bool result;
-  // Read Status
   if (status)
   {
     result = this->write_i2c(0x2B, 1);
@@ -247,6 +293,32 @@ bool IpsSensor::setFan(bool status)
   else
   {
     result = this->write_i2c(0x2B, 0);
+  }
+  return result;
+}
+
+bool IpsSensor::setPSM(bool status)
+{
+  bool result;
+  if (status)
+  {
+    result = this->write_i2c(0x23, 1);
+  }
+  else
+  {
+    result = this->write_i2c(0x23, 0);
+  }
+  return result;
+}
+
+bool IpsSensor::setDataUnit(int unit)
+{
+  bool result;
+  if (unit >= 0 and unit <= 3) {
+    result = this->write_i2c(0x24, unit);
+  }
+  else{
+    result = false;
   }
   return result;
 }
