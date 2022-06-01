@@ -23,13 +23,6 @@ void IpsSensor::begin(int sda, int scl)
   Wire.write(0x01);
   Wire.endTransmission();
 
-  // Wire.beginTransmission(0x4B);
-  // Wire.write(0x22);
-  // Wire.write(0x00);
-  // Wire.endTransmission();
-  // Wire.beginTransmission(0x4B);
-  // Wire.write(0x2d);
-  // Wire.endTransmission();
 }
 
 void IpsSensor::update()
@@ -90,8 +83,6 @@ void IpsSensor::read_i2c(unsigned char command, int reply_size, uint8_t res_arra
   bool checksum_pass = false;
   while (!checksum_pass)
   {
-    // uint8_t *new_command = &command;
-    // Wire.writeTransmission(0x4B, new_command, 8, false);
     Wire.beginTransmission(0x4B);
     Wire.write(command);
     Wire.endTransmission();

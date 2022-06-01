@@ -14,8 +14,12 @@ void setup()
   // Initiate USB serial at 115200 baud
   Serial.begin(115200);
   Serial.println("\nI2C Test");
+
   // Wait on IPS boot
   delay(5500);
+
+  // Enable debugging
+  // ips_sensor.setDebug(true);
 
   // Initiate I2C connection SDA 21, SCL 22 by default
   // Set different pins by using:
@@ -29,31 +33,30 @@ void loop()
   // Get new IPS sensor readings
   // Not meant to run more than once per second
   ips_sensor.update();
-  //Enable debugging
-  // ips_sensor.setDebug(true);
 
-  // Print PC0.1 via USB serial
-  // Serial.println(ips_sensor.getPC01());
+  Serial.print("PM2.5: ");
+  Serial.print(ips_sensor.getPM25());
+  Serial.print("\n");
 
-  // Print PM1.0 via USB serial
-  // Serial.print("PM1.0: ");
-  // Serial.print(ips_sensor.getPM10());
-  // Serial.print("\n");
+  Serial.print("PC1.0: ");
+  Serial.print(ips_sensor.getPC10());
+  Serial.print("\n");
 
-  // Print PM2.5 via USB serial
-  // Serial.print("PM2.5: ");
-  // Serial.print(ips_sensor.getPM25());
-  // Serial.print("\n");
+  // Print sensor status
+  // int status = ips_sensor.getStatus();
+  // Serial.println(status);
 
-  // Print PM10 via USB serial
-  // Serial.print("PM10: ");
-  // Serial.print(ips_sensor.getPM100());
-  // Serial.print("\n");
+  // Print data unit
+  // int unit = ips_sensor.getDataUnit();
+  // Serial.println(unit);
 
-  // Print PC1.0 via USB serial
-  // Serial.print("PC1.0: ");
-  // Serial.print(ips_sensor.getPC10());
-  // Serial.print("\n");
+  // Serial.print("Entering power saving mode...\n");
+  // ips_sensor.setPSM(true);
+  // delay(1000);
+
+  // Serial.print("Leaving power saving mode...\n");
+  // ips_sensor.setPSM(false);
+  // delay(1000);
   
   // Serial.print("Serial #: ");
   // uint8_t serial[19];
@@ -73,31 +76,13 @@ void loop()
   // Serial.print(ips_sensor.getDataUnit());
   // Serial.print("\n");
 
-  ips_sensor.setCleaningInterval(604800);
+  // ips_sensor.setCleaningInterval(604800);
   // delay(500);
   // ips_sensor.setDataUnit(0);
   
-  
-  Serial.print("Cleaning interval: ");
-  Serial.print(ips_sensor.getCleaningInterval());
-  Serial.print("\n");
-
-  // delay(1000);
-  // ips_sensor.setCleaningInterval(704802);
-  // delay(2000);
-  
-  // ips_sensor.setPSM(true);
-  // delay(1000);
-
-  // ips_sensor.update();
-  // delay(2000);
-
   // Serial.print("Cleaning interval: ");
   // Serial.print(ips_sensor.getCleaningInterval());
   // Serial.print("\n");
-
-  // ips_sensor.setFan(true);
-  // last = !last;
 
   // Print sensor status
   // int status = ips_sensor.getStatus();
@@ -107,23 +92,5 @@ void loop()
   // int vref = ips_sensor.getVref();
   // Serial.println(vref);
 
-  // Testing I2C accuracy
-  // if (vref == 1800) {
-  //   success_count++;
-  // } else {
-  //   fail_count++;
-  // }
-  // if (status == 1) {
-  //   success_count++;
-  // } else {
-  //   fail_count++;
-  // }
-  // Serial.print("Success_count: ");
-  // Serial.print(success_count);
-  // Serial.print(" Fail_count: ");
-  // Serial.print(fail_count);
-  // Serial.print("\n");
-
-
-  delay(500);
+  delay(1000);
 }
