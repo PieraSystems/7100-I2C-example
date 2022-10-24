@@ -12,6 +12,7 @@ class IpsSensor
 public:
     unsigned long pc_values[7] = {0, 0, 0, 0, 0, 0, 0};
     float pm_values[7] = {0, 0, 0, 0, 0, 0, 0};
+    uint16_t event_status = 0;
     void begin(int sda = 21, int scl = 22);
     void update();
     unsigned long *getPC();
@@ -30,6 +31,7 @@ public:
     float getPM25();
     float getPM50();
     float getPM100();
+    uint16_t getEventStatus();
     int getVref();
     int getStatus();
     int getDataUnit();

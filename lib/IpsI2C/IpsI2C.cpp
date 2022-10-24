@@ -53,6 +53,8 @@ void IpsSensor::update()
     }
     this->pm_values[i] = b.f;
   }
+  // Get event status
+  this->event_status = (pm_raw_values[28] * 256) + pm_raw_values[29];
 }
 
 // Get CRC16 checksum
@@ -209,6 +211,10 @@ float IpsSensor::getPM50()
 float IpsSensor::getPM100()
 {
   return this->pm_values[6];
+}
+uint16_t IpsSensor::getEventStatus()
+{
+  return this->event_status;
 }
 
 int IpsSensor::getVref()

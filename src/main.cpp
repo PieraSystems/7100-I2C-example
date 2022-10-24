@@ -42,12 +42,18 @@ void loop()
   Serial.print(ips_sensor.getPC10());
   Serial.print("\n");
 
+  // Print event status
+  // Serial.print("Event status: ");
+  // Serial.print(ips_sensor.getEventStatus());
+  // Serial.print("\n");
+
   // Print sensor status
   // int status = ips_sensor.getStatus();
   // Serial.println(status);
 
   // Print data unit
   // int unit = ips_sensor.getDataUnit();
+  // Serial.println("Data unit:");
   // Serial.println(unit);
 
   // Serial.print("Entering power saving mode...\n");
@@ -86,11 +92,14 @@ void loop()
 
   // Print sensor status
   // int status = ips_sensor.getStatus();
+  // Serial.println("Status:");
   // Serial.println(status);
 
   // Print Vref value
   // int vref = ips_sensor.getVref();
+  // Serial.print("Vref: ");
   // Serial.println(vref);
+  // Serial.print("\n");
 
   delay(1000);
 }
